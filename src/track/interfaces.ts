@@ -1,5 +1,5 @@
 interface ITrack {
-  _id: string;
+  id: string;
   name: string;
   artistId?: string;
   albumId?: string;

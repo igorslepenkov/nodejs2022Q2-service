@@ -7,9 +7,10 @@ import { ArtistController } from './artist/artist.controller';
 import { AlbumController } from './album/album.controller';
 import { FavsController } from './favs/favs.controller';
 import { TrackService } from './track/track.service';
+import { TrackModule } from './track/track.module';
 
 @Module({
-  imports: [],
+  imports: [TrackModule],
   controllers: [AppController, UserController, TrackController, ArtistController, AlbumController, FavsController],
   providers: [AppService, TrackService],
 })

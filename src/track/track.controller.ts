@@ -1,21 +1,21 @@
-import { Controller, Get, Post } from '@nestjs/common';
-
-const tracks = [];
+import { Controller, Get, Post, Body } from '@nestjs/common';
+import { CreateTrackDto } from './dto/create-track.dto';
+import { TrackService } from './track.service';
+import { ITrack } from './types';
 
 @Controller('track')
 export class TrackController {
+  constructor(private trackService: TrackService) {}
+
   @Get()
-  getTracks() {
+  getTracks(): ITrack[] {
+    const tracks = this.trackService.findAll();
     return tracks;
   }
+
   @Post()
-  postNewTrack() {
-    const newTrack = {
-      _id: 'LOPATA',
-      title: 'DVOROVAYA',
-      duration: 10,
-    };
-    tracks.push(newTrack);
+  postNewTrack(@Body() createTrackDto: CreateTrackDto) {
+    const newTrack = this.trackService.create(createTrackDto);
     return newTrack;
   }
 }

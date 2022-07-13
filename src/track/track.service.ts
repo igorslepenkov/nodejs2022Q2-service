@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTrackDto } from './dto/create-track.dto';
+import { CreateTrackDto } from './dto/createTrack.dto';
 import { ITrack } from './interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateTrackDto } from './dto/updateTrack.dto';

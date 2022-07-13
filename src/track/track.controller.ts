@@ -8,8 +8,8 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { CreateTrackDto } from './dto/create-track.dto';
-import { FindOneParams } from './dto/find-one.dto';
+import { CreateTrackDto } from './dto/createTrack.dto';
+import { FindOneParams } from './dto/findOneParams.dto';
 import { UpdateTrackDto } from './dto/updateTrack.dto';
 import { TrackService } from './track.service';
 import { ITrack } from './interfaces';
@@ -30,14 +30,13 @@ export class TrackController {
     if (track) {
       return track;
     } else {
-      throw new NotFoundException();
+      throw new NotFoundException('User not found');
     }
   }
 
   @Post()
   postNewTrack(@Body() createTrackDto: CreateTrackDto) {
-    const newTrack = this.trackService.create(createTrackDto);
-    return newTrack;
+    return this.trackService.create(createTrackDto);
   }
 
   @Put(':id')
@@ -49,7 +48,7 @@ export class TrackController {
     if (updatedTrack) {
       return updatedTrack;
     } else {
-      throw new NotFoundException();
+      throw new NotFoundException('User not found');
     }
   }
 
@@ -59,7 +58,7 @@ export class TrackController {
     if (deleteTrack) {
       return true;
     } else {
-      throw new NotFoundException();
+      throw new NotFoundException('User not found');
     }
   }
 }

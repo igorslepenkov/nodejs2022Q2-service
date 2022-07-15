@@ -48,4 +48,9 @@ export class AlbumService {
       return false;
     }
   }
+
+  handleDeletedArtistReference(id: string) {
+    const albums = this.albums.filter((album) => album.artistId === id);
+    albums.forEach((album) => (album.artistId = null));
+  }
 }

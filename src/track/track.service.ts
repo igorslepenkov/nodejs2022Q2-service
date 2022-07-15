@@ -52,4 +52,14 @@ export class TrackService {
       return false;
     }
   }
+
+  handleDeletedAlbumReference(id: string) {
+    const tracks = this.tracks.filter((track) => track.albumId === id);
+    tracks.forEach((track) => (track.albumId = null));
+  }
+
+  handleDeletedArtistReference(id: string) {
+    const tracks = this.tracks.filter((track) => track.artistId === id);
+    tracks.forEach((track) => (track.artistId = null));
+  }
 }

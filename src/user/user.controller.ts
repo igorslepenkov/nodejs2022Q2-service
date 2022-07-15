@@ -45,10 +45,10 @@ export class UserController {
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
     const response = this.userService.update(id, updatePasswordDto);
-    if (response) {
+    if (response && response !== 'wrong password') {
       return response;
     } else if (response === 'wrong password') {
-      throw new ForbiddenException('Wrong previous password');
+      throw new ForbiddenException('Wrong old password');
     } else {
       throw new NotFoundException('User with such id not found');
     }

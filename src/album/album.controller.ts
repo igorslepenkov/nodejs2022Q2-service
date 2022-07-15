@@ -9,6 +9,9 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { ArtistService } from 'src/artist/artist.service';
+import { FavsService } from 'src/favs/favs.service';
+import { TrackService } from 'src/track/track.service';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/createAlbum.dto';
 import { FindOneParams } from './dto/findOneParams.dto';
@@ -16,7 +19,11 @@ import { UpdateAlbumDto } from './dto/updateAlbum.dto';
 
 @Controller('album')
 export class AlbumController {
-  constructor(private albumService: AlbumService) {}
+  constructor(
+    private albumService: AlbumService,
+    private trackService: TrackService,
+    private favsService: FavsService,
+  ) {}
 
   @Get()
   findAllAlbums() {
@@ -56,6 +63,10 @@ export class AlbumController {
   deleteAlbum(@Param() { id }: FindOneParams) {
     const response = this.albumService.delete(id);
     if (response) {
+      try {
+        this.favsService.delete({ type: 'album', id });
+        this.trackService.handleDeletedAlbumReference(id);
+      } catch (err) {}
       return true;
     } else {
       throw new NotFoundException('Album not found');

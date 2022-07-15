@@ -13,6 +13,7 @@ import { ArtistService } from 'src/artist/artist.service';
 import { FindOneParams } from 'src/track/dto/findOneParams.dto';
 import { TrackService } from 'src/track/track.service';
 import { FavsService } from './favs.service';
+import { IFavorites, IFavoritesResponse } from './interfaces';
 
 @Controller('favs')
 export class FavsController {
@@ -23,9 +24,37 @@ export class FavsController {
     private artistService: ArtistService,
   ) {}
 
+  resolveFilds({ tracks, albums, artists }: IFavorites): IFavoritesResponse {
+    const response = {
+      tracks: [],
+      albums: [],
+      artists: [],
+    };
+
+    if (tracks) {
+      response.tracks = tracks.map((trackId) =>
+        this.trackService.findById(trackId),
+      );
+    }
+
+    if (albums) {
+      response.albums = albums.map((albumId) =>
+        this.albumService.findAlbumById(albumId),
+      );
+    }
+
+    if (artists) {
+      response.artists = artists.map((artistId) =>
+        this.artistService.findArtistById(artistId),
+      );
+    }
+
+    return response;
+  }
+
   @Get()
   getAllFavs() {
-    return this.favsService.get();
+    return this.resolveFilds(this.favsService.get());
   }
 
   @Post('track/:id')

@@ -21,10 +21,9 @@ export class TrackService {
       id: uuidv4(),
       name,
       duration,
+      artistId: artistId || null,
+      albumId: albumId || null,
     };
-    artistId ? (newTrack.artistId = artistId) : false;
-    albumId ? (newTrack.albumId = albumId) : false;
-
     this.tracks.push(newTrack);
     return newTrack;
   }

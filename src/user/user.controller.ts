@@ -4,6 +4,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Post,
@@ -54,6 +55,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   deleteUser(@Param() { id }: FindOneParams) {
     const response = this.userService.delete(id);
     if (response) {

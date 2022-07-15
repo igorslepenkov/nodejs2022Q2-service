@@ -25,7 +25,7 @@ export class UserService {
       password,
       version: 1,
       createdAt: Date.now(),
-      updatedAt: 0,
+      updatedAt: Date.now(),
     };
 
     this.users.push(newUser);
@@ -39,6 +39,7 @@ export class UserService {
     if (user && oldPassword === user.password) {
       user.password = newPassword;
       user.updatedAt = Date.now();
+      user.version += 1;
       return userToOutput(user);
     } else if (user && oldPassword !== user.password) {
       return 'wrong password';

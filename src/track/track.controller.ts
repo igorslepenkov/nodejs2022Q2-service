@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Put,
   Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { CreateTrackDto } from './dto/createTrack.dto';
 import { FindOneParams } from './dto/findOneParams.dto';
@@ -53,9 +54,10 @@ export class TrackController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   deleteTrack(@Param() { id }: FindOneParams) {
-    const deleteTrack = this.trackService.delete(id);
-    if (deleteTrack) {
+    const response = this.trackService.delete(id);
+    if (response) {
       return true;
     } else {
       throw new NotFoundException('User not found');

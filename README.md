@@ -4,6 +4,7 @@
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
 - Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- Docker - [Download & Install Docker](https://docs.docker.com/get-docker/).
 
 ## Downloading
 
@@ -21,6 +22,14 @@ npm install
 
 ```
 npm start
+```
+
+## Running application within Docker
+
+```
+docker compose up -d (app is running in docker container in dev mode, all local changes reflect in container, containers auto restart after crash)
+
+npm scan (scanning images for security vulnerabilities)
 ```
 
 After starting the app on port (4000 as default) you can open

@@ -24,32 +24,32 @@ export class TrackController {
   ) {}
 
   @Get()
-  getTracks(): ITrack[] {
-    const tracks = this.trackService.findAll();
-    return tracks;
+  async getTracks() {
+    const tracks = await this.trackService.findAll();
+    return tracks.map((track) => track.toResponse());
   }
 
   @Get(':id')
-  getTrack(@Param() { id }: FindOneParams): ITrack {
-    const track = this.trackService.findById(id);
+  async getTrack(@Param() { id }: FindOneParams) {
+    const track = await this.trackService.findById(id);
     if (track) {
-      return track;
+      return track.toResponse();
     } else {
       throw new NotFoundException('User not found');
     }
   }
 
   @Post()
-  postNewTrack(@Body() createTrackDto: CreateTrackDto) {
-    return this.trackService.create(createTrackDto);
+  async postNewTrack(@Body() createTrackDto: CreateTrackDto) {
+    return await this.trackService.create(createTrackDto);
   }
 
   @Put(':id')
-  updateTrack(
+  async updateTrack(
     @Param() { id }: FindOneParams,
     @Body() updateTrackDto: UpdateTrackDto,
   ) {
-    const updatedTrack = this.trackService.update(id, updateTrackDto);
+    const updatedTrack = await this.trackService.update(id, updateTrackDto);
     if (updatedTrack) {
       return updatedTrack;
     } else {
@@ -59,11 +59,11 @@ export class TrackController {
 
   @Delete(':id')
   @HttpCode(204)
-  deleteTrack(@Param() { id }: FindOneParams) {
-    const response = this.trackService.delete(id);
+  async deleteTrack(@Param() { id }: FindOneParams) {
+    const response = await this.trackService.delete(id);
     if (response) {
       try {
-        this.favsService.delete({ type: 'track', id });
+        await this.favsService.delete({ type: 'track', id });
       } catch (err) {}
       return true;
     } else {

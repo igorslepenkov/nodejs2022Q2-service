@@ -1,65 +1,91 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/createTrack.dto';
-import { ITrack } from './interfaces';
-import { v4 as uuidv4 } from 'uuid';
 import { UpdateTrackDto } from './dto/updateTrack.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TrackEntity } from './entities/track.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
-  private tracks: ITrack[] = [];
+  @InjectRepository(TrackEntity)
+  private trackRepository: Repository<TrackEntity>;
 
-  findAll() {
-    return this.tracks;
-  }
-
-  findById(id: string) {
-    return this.tracks.find((track) => track.id === id);
-  }
-
-  create({ name, artistId, albumId, duration }: CreateTrackDto) {
-    const newTrack: ITrack = {
-      id: uuidv4(),
-      name,
-      duration,
-      artistId: artistId || null,
-      albumId: albumId || null,
-    };
-    this.tracks.push(newTrack);
-    return newTrack;
-  }
-
-  update(id: string, { name, artistId, albumId, duration }: UpdateTrackDto) {
-    const currentTrack = this.tracks.find((track) => track.id === id);
-
-    if (currentTrack) {
-      name ? (currentTrack.name = name) : false;
-      name ? (currentTrack.artistId = artistId) : false;
-      name ? (currentTrack.albumId = albumId) : false;
-      name ? (currentTrack.duration = duration) : false;
-
-      return currentTrack;
+  async create(trackDto: CreateTrackDto) {
+    const createdTrack = this.trackRepository.create(trackDto);
+    const savedTrack = await this.trackRepository.save(createdTrack);
+    if (savedTrack) {
+      return savedTrack.toResponse();
     } else {
       return null;
     }
   }
 
-  delete(id: string) {
-    const track = this.tracks.find((track) => track.id === id);
+  async findAll() {
+    const tracks = await this.trackRepository.find();
+    return tracks;
+  }
+
+  async findById(id: string) {
+    const track = await this.trackRepository.findOne({ where: { id } });
     if (track) {
-      this.tracks = this.tracks.filter((track) => track.id !== id);
+      return track;
+    } else {
+      return null;
+    }
+  }
+
+  async update(
+    id: string,
+    { name, artistId, albumId, duration }: UpdateTrackDto,
+  ) {
+    const currentTrack = await this.trackRepository.findOne({ where: { id } });
+
+    if (currentTrack) {
+      name ? (currentTrack.name = name) : false;
+      duration ? (currentTrack.duration = duration) : false;
+      artistId || artistId === null
+        ? (currentTrack.artistId = artistId)
+        : false;
+      albumId || albumId === null ? (currentTrack.albumId = albumId) : false;
+
+      const updatedTrack = await this.trackRepository.save(currentTrack);
+
+      return updatedTrack.toResponse();
+    } else {
+      return null;
+    }
+  }
+
+  async delete(id: string) {
+    const response = await this.trackRepository.delete(id);
+    if (response.affected !== 0) {
       return true;
     } else {
       return false;
     }
   }
 
-  handleDeletedAlbumReference(id: string) {
-    const tracks = this.tracks.filter((track) => track.albumId === id);
-    tracks.forEach((track) => (track.albumId = null));
-  }
+  async handleDeletedRef(type: 'artist' | 'album', id: string) {
+    try {
+      const tracks = await this.findAll();
+      const tracksWithRef = tracks.filter((tracks) => {
+        if (type === 'album') {
+          return tracks.albumId === id;
+        } else {
+          return tracks.artistId === id;
+        }
+      });
 
-  handleDeletedArtistReference(id: string) {
-    const tracks = this.tracks.filter((track) => track.artistId === id);
-    tracks.forEach((track) => (track.artistId = null));
+      const updates: UpdateTrackDto = {};
+
+      type === 'artist' ? (updates.artistId = null) : false;
+      type === 'album' ? (updates.albumId = null) : false;
+
+      await Promise.all(
+        tracksWithRef.map(async (track) => {
+          return await this.update(track.id, updates);
+        }),
+      );
+    } catch (err) {}
   }
 }

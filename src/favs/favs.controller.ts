@@ -9,8 +9,11 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { AlbumService } from 'src/album/album.service';
+import { IAlbum } from 'src/album/interfaces';
 import { ArtistService } from 'src/artist/artist.service';
-import { FindOneParams } from 'src/track/dto/findOneParams.dto';
+import { IArtist } from 'src/artist/interfaces';
+import { FindOneParams } from './dto/findOneParams.dto';
+import { ITrack } from 'src/track/interfaces';
 import { TrackService } from 'src/track/track.service';
 import { FavsService } from './favs.service';
 import { IFavorites, IFavoritesResponse } from './interfaces';
@@ -24,44 +27,16 @@ export class FavsController {
     private artistService: ArtistService,
   ) {}
 
-  resolveFilds({ tracks, albums, artists }: IFavorites): IFavoritesResponse {
-    const response = {
-      tracks: [],
-      albums: [],
-      artists: [],
-    };
-
-    if (tracks) {
-      response.tracks = tracks.map((trackId) =>
-        this.trackService.findById(trackId),
-      );
-    }
-
-    if (albums) {
-      response.albums = albums.map((albumId) =>
-        this.albumService.findAlbumById(albumId),
-      );
-    }
-
-    if (artists) {
-      response.artists = artists.map((artistId) =>
-        this.artistService.findArtistById(artistId),
-      );
-    }
-
-    return response;
-  }
-
   @Get()
-  getAllFavs() {
-    return this.resolveFilds(this.favsService.get());
+  async getAllFavs() {
+    return await this.favsService.get();
   }
 
   @Post('track/:id')
-  addTrackToFavourites(@Param() { id }: FindOneParams) {
-    const track = this.trackService.findById(id);
+  async addTrackToFavourites(@Param() { id }: FindOneParams) {
+    const track = await this.trackService.findById(id);
     if (track) {
-      this.favsService.add({ type: 'track', id });
+      await this.favsService.add({ type: 'track', track });
       return 'Track has been successfuly added to favourites';
     } else {
       throw new UnprocessableEntityException(
@@ -72,18 +47,18 @@ export class FavsController {
 
   @Delete('track/:id')
   @HttpCode(204)
-  removeTrackFromFavourites(@Param() { id }: FindOneParams) {
-    const response = this.favsService.delete({ type: 'track', id });
+  async removeTrackFromFavourites(@Param() { id }: FindOneParams) {
+    const response = await this.favsService.delete({ type: 'track', id });
     if (!response) {
       throw new NotFoundException('This track is not in favourites');
     }
   }
 
   @Post('album/:id')
-  addAlbumToFavourites(@Param() { id }: FindOneParams) {
-    const album = this.albumService.findAlbumById(id);
+  async addAlbumToFavourites(@Param() { id }: FindOneParams) {
+    const album = await this.albumService.findAlbumById(id);
     if (album) {
-      this.favsService.add({ type: 'album', id });
+      await this.favsService.add({ type: 'album', album });
       return 'Album has been successfuly added to favourites';
     } else {
       throw new UnprocessableEntityException(
@@ -94,18 +69,18 @@ export class FavsController {
 
   @Delete('album/:id')
   @HttpCode(204)
-  removeAlbumFromFavourites(@Param() { id }: FindOneParams) {
-    const response = this.favsService.delete({ type: 'album', id });
+  async removeAlbumFromFavourites(@Param() { id }: FindOneParams) {
+    const response = await this.favsService.delete({ type: 'album', id });
     if (!response) {
       throw new NotFoundException('This album is not in favourites');
     }
   }
 
   @Post('artist/:id')
-  addArtistToFavourites(@Param() { id }: FindOneParams) {
-    const artist = this.artistService.findArtistById(id);
+  async addArtistToFavourites(@Param() { id }: FindOneParams) {
+    const artist = await this.artistService.findArtistById(id);
     if (artist) {
-      this.favsService.add({ type: 'artist', id });
+      await this.favsService.add({ type: 'artist', artist });
       return 'Artist has been successfuly added to favourites';
     } else {
       throw new UnprocessableEntityException(
@@ -116,8 +91,8 @@ export class FavsController {
 
   @Delete('artist/:id')
   @HttpCode(204)
-  removeArtistFromFavourites(@Param() { id }: FindOneParams) {
-    const response = this.favsService.delete({ type: 'artist', id });
+  async removeArtistFromFavourites(@Param() { id }: FindOneParams) {
+    const response = await this.favsService.delete({ type: 'artist', id });
     if (!response) {
       throw new NotFoundException('This artist is not in favourites');
     }

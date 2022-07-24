@@ -3,17 +3,17 @@ import { IsInt, IsOptional, IsString } from 'class-validator';
 export class UpdateTrackDto {
   @IsString()
   @IsOptional()
-  name: string;
+  name?: string;
 
   @IsString()
   @IsOptional()
-  artistId: string | null;
+  artistId?: string | null;
 
   @IsString()
   @IsOptional()
-  albumId: string | null;
+  albumId?: string | null;
 
   @IsInt()
   @IsOptional()
-  duration: number;
+  duration?: number;
 }

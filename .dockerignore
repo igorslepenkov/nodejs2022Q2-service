@@ -1,4 +1,4 @@
 node_modules
 .git
 Dockerfile
-./src/db
+./src/db/Dockerfile

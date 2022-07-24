@@ -3,13 +3,13 @@ import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 export class UpdateAlbumDto {
   @IsOptional()
   @IsString()
-  name: string;
+  name?: string;
 
   @IsOptional()
   @IsNumber()
-  year: number;
+  year?: number;
 
   @IsOptional()
   @IsUUID('4')
-  artistId: string | null;
+  artistId?: string | null;
 }

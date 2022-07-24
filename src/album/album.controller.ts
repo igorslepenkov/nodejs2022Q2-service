@@ -26,31 +26,33 @@ export class AlbumController {
   ) {}
 
   @Get()
-  findAllAlbums() {
-    return this.albumService.findAllAlbums();
+  async findAllAlbums() {
+    return (await this.albumService.findAllAlbums()).map((album) =>
+      album.toResponse(),
+    );
   }
 
   @Get(':id')
-  findAlbumById(@Param() { id }: FindOneParams) {
-    const album = this.albumService.findAlbumById(id);
+  async findAlbumById(@Param() { id }: FindOneParams) {
+    const album = await this.albumService.findAlbumById(id);
     if (album) {
-      return album;
+      return album.toResponse();
     } else {
       throw new NotFoundException('Album not found');
     }
   }
 
   @Post()
-  createAlbum(@Body() createAlbumDto: CreateAlbumDto) {
-    return this.albumService.create(createAlbumDto);
+  async createAlbum(@Body() createAlbumDto: CreateAlbumDto) {
+    return await this.albumService.create(createAlbumDto);
   }
 
   @Put(':id')
-  updateAlbum(
+  async updateAlbum(
     @Param() { id }: FindOneParams,
     @Body() updateAlbumDto: UpdateAlbumDto,
   ) {
-    const album = this.albumService.update(id, updateAlbumDto);
+    const album = await this.albumService.update(id, updateAlbumDto);
     if (album) {
       return album;
     } else {
@@ -60,12 +62,12 @@ export class AlbumController {
 
   @Delete(':id')
   @HttpCode(204)
-  deleteAlbum(@Param() { id }: FindOneParams) {
-    const response = this.albumService.delete(id);
+  async deleteAlbum(@Param() { id }: FindOneParams) {
+    const response = await this.albumService.delete(id);
     if (response) {
       try {
-        this.favsService.delete({ type: 'album', id });
-        this.trackService.handleDeletedAlbumReference(id);
+        await this.favsService.delete({ type: 'album', id });
+        await this.trackService.handleDeletedRef('album', id);
       } catch (err) {}
       return true;
     } else {

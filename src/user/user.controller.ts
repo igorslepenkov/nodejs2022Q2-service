@@ -20,13 +20,13 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
-  getAllUsers() {
-    return this.userService.findAll();
+  async getAllUsers() {
+    return await this.userService.findAll();
   }
 
   @Get(':id')
-  getUserById(@Param() { id }: FindOneParams) {
-    const user = this.userService.findById(id);
+  async getUserById(@Param() { id }: FindOneParams) {
+    const user = await this.userService.findById(id);
     if (user) {
       return user;
     } else {
@@ -35,16 +35,16 @@ export class UserController {
   }
 
   @Post()
-  createUser(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    return await this.userService.create(createUserDto);
   }
 
   @Put(':id')
-  updatePassword(
+  async updatePassword(
     @Param() { id }: FindOneParams,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    const response = this.userService.update(id, updatePasswordDto);
+    const response = await this.userService.update(id, updatePasswordDto);
     if (response && response !== 'wrong password') {
       return response;
     } else if (response === 'wrong password') {
@@ -56,8 +56,8 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(204)
-  deleteUser(@Param() { id }: FindOneParams) {
-    const response = this.userService.delete(id);
+  async deleteUser(@Param() { id }: FindOneParams) {
+    const response = await this.userService.delete(id);
     if (response) {
       return true;
     } else {

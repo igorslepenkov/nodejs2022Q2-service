@@ -4,7 +4,6 @@ import { RemoveFromFavourites } from './dto/removeFromFavourites.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FavouritesEntity } from './entities/favs.entity';
 import { Repository } from 'typeorm';
-import { IFavorites } from './interfaces';
 
 @Injectable()
 export class FavsService {

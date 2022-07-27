@@ -9,14 +9,10 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { AlbumService } from 'src/album/album.service';
-import { IAlbum } from 'src/album/interfaces';
 import { ArtistService } from 'src/artist/artist.service';
-import { IArtist } from 'src/artist/interfaces';
 import { FindOneParams } from './dto/findOneParams.dto';
-import { ITrack } from 'src/track/interfaces';
 import { TrackService } from 'src/track/track.service';
 import { FavsService } from './favs.service';
-import { IFavorites, IFavoritesResponse } from './interfaces';
 
 @Controller('favs')
 export class FavsController {

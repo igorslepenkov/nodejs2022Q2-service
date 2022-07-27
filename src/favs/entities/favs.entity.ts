@@ -3,13 +3,7 @@ import { IAlbum } from 'src/album/interfaces';
 import { ArtistEntity } from 'src/artist/entities/artist.entity';
 import { IArtist } from 'src/artist/interfaces';
 import { TrackEntity } from 'src/track/entities/track.entity';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { IFavorites } from '../interfaces';
 
 @Entity()

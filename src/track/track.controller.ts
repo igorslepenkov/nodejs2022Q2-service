@@ -13,7 +13,6 @@ import { CreateTrackDto } from './dto/createTrack.dto';
 import { FindOneParams } from './dto/findOneParams.dto';
 import { UpdateTrackDto } from './dto/updateTrack.dto';
 import { TrackService } from './track.service';
-import { ITrack } from './interfaces';
 import { FavsService } from 'src/favs/favs.service';
 
 @Controller('track')

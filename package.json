@@ -5,6 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "homepage": ".",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",

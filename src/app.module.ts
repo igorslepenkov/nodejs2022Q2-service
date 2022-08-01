@@ -8,6 +8,7 @@ import { AlbumModule } from './album/album.module';
 import { FavsService } from './favs/favs.service';
 import { FavsModule } from './favs/favs.module';
 import { DBModule } from './db/db.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { DBModule } from './db/db.module';
     AlbumModule,
     FavsModule,
     DBModule,
+    AuthModule,
   ],
   providers: [UserService, ArtistService, FavsService],
 })

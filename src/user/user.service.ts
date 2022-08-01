@@ -4,6 +4,7 @@ import { UpdatePasswordDto } from './dto/updatePassword.dto';
 import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+const bcrypt = require('bcryptjs');
 
 @Injectable()
 export class UserService {
@@ -12,7 +13,15 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
+  async hashPassword(password: string): Promise<string> {
+    const hashedPassword: string | undefined = await bcrypt.hash(password, 10);
+    return hashedPassword;
+  }
+
   async create(userDto: CreateUserDto) {
+    const hashedPassword = await this.hashPassword(userDto.password);
+    userDto.password = hashedPassword;
+
     const createdUser = this.userRepository.create(userDto);
     const savedUser = await this.userRepository.save(createdUser);
     if (savedUser) {
@@ -38,11 +47,15 @@ export class UserService {
 
   async update(id: string, { oldPassword, newPassword }: UpdatePasswordDto) {
     const user = await this.userRepository.findOne({ where: { id } });
-    if (user && oldPassword === user.password) {
-      user.password = newPassword;
-      return (await this.userRepository.save(user)).toResponse();
-    } else if (user && oldPassword !== user.password) {
-      return 'wrong password';
+    if (user) {
+      const compare = await bcrypt.compare(oldPassword, user.password);
+      if (compare) {
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedNewPassword;
+        return (await this.userRepository.save(user)).toResponse();
+      } else {
+        return 'wrong password';
+      }
     } else {
       return null;
     }

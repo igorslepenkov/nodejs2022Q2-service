@@ -1,6 +1,7 @@
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { Public } from 'src/meta/public';
 import { AuthService } from './auth.service';
+import { RefreshDto } from './dto/refresh.dto';
 import { SignUpDto } from './dto/signUp.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
@@ -20,4 +21,10 @@ export class AuthController {
   async login(@Request() req) {
     return this.authService.loginUser(req.user);
   }
+
+  // @Public()
+  // @Post('/refresh')
+  // async refresh(@Body() refreshDto: RefreshDto) {
+  //   return this.authService.loginUser(req.user);
+  // }
 }

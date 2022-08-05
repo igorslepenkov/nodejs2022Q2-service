@@ -17,7 +17,7 @@ export class UserService {
   async hashPassword(password: string): Promise<string> {
     const hashedPassword: string | undefined = await bcrypt.hash(
       password,
-      process.env.CRYPT_SALT,
+      Number(process.env.CRYPT_SALT),
     );
     return hashedPassword;
   }

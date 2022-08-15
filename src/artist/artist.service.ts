@@ -1,46 +1,55 @@
 import { Injectable } from '@nestjs/common';
 import { CreateArtistDto } from './dto/createArtist.dto';
-import { IArtist } from './interfaces';
-import { v4 as uuidv4 } from 'uuid';
 import { UpdateArtistDto } from './dto/updateArtist.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ArtistEntity } from './entities/artist.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistService {
-  private artists: IArtist[] = [];
+  @InjectRepository(ArtistEntity)
+  private artistRepository: Repository<ArtistEntity>;
 
-  findAllArtists() {
-    return this.artists;
+  async findAllArtists() {
+    const artists = await this.artistRepository.find();
+    return artists;
   }
 
-  findArtistById(id: string) {
-    return this.artists.find((artist) => artist.id === id);
+  async findArtistById(id: string) {
+    const artist = await this.artistRepository.findOne({ where: { id } });
+    if (artist) {
+      return artist;
+    } else {
+      return null;
+    }
   }
 
-  create({ name, grammy }: CreateArtistDto) {
-    const newArtist: IArtist = {
-      id: uuidv4(),
-      name,
-      grammy: grammy,
-    };
-    this.artists.push(newArtist);
-    return newArtist;
+  async create(artistDto: CreateArtistDto) {
+    const createdArtist = this.artistRepository.create(artistDto);
+    const savedArtist = await this.artistRepository.save(createdArtist);
+    if (savedArtist) {
+      return savedArtist.toResponse();
+    } else {
+      return null;
+    }
   }
 
-  update(id: string, { name, grammy }: UpdateArtistDto) {
-    const currentArtist = this.artists.find((artist) => artist.id === id);
+  async update(id: string, { name, grammy }: UpdateArtistDto) {
+    const currentArtist = await this.artistRepository.findOne({
+      where: { id },
+    });
     if (currentArtist) {
-      name ? (currentArtist.name = name) : (currentArtist.grammy = false);
-      grammy ? (currentArtist.grammy = grammy) : (currentArtist.grammy = false);
-      return currentArtist;
+      name ? (currentArtist.name = name) : false;
+      grammy !== undefined ? (currentArtist.grammy = grammy) : false;
+      return (await this.artistRepository.save(currentArtist)).toResponse();
     } else {
       return false;
     }
   }
 
-  delete(id: string) {
-    const artist = this.artists.find((artist) => artist.id === id);
-    if (artist) {
-      this.artists = this.artists.filter((artist) => artist.id !== id);
+  async delete(id: string) {
+    const response = await this.artistRepository.delete(id);
+    if (response.affected !== 0) {
       return true;
     } else {
       return false;

@@ -1,66 +1,92 @@
 import { Injectable } from '@nestjs/common';
 import { AddToFavouritesDto } from './dto/addToFavourites.dto';
 import { RemoveFromFavourites } from './dto/removeFromFavourites.dto';
-import { IFavorites } from './interfaces';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FavouritesEntity } from './entities/favs.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class FavsService {
-  private favorites: IFavorites = {
-    artists: [],
-    albums: [],
-    tracks: [],
-  };
+  @InjectRepository(FavouritesEntity)
+  private favsRepository: Repository<FavouritesEntity>;
+  private currentFav: FavouritesEntity = null;
 
-  get() {
-    return this.favorites;
+  async get() {
+    if (this.currentFav) {
+      const favourites = await this.favsRepository.findOne({
+        where: { id: this.currentFav.id },
+        relations: {
+          artists: true,
+          albums: true,
+          tracks: true,
+        },
+      });
+      return favourites.toResponse();
+    } else {
+      const favourites = this.favsRepository.create({
+        tracks: [],
+        albums: [],
+        artists: [],
+      });
+      this.currentFav = await this.favsRepository.save(favourites);
+      return this.currentFav.toResponse();
+    }
   }
 
-  add({ type, id }: AddToFavouritesDto) {
+  async add({ type, track, album, artist }: AddToFavouritesDto) {
+    const favourites = await this.get();
+
     switch (type) {
       case 'album':
-        this.favorites.albums.push(id);
+        favourites.albums.push(album);
+        await this.favsRepository.save(favourites);
         break;
       case 'artist':
-        this.favorites.artists.push(id);
+        favourites.artists.push(artist);
+        await this.favsRepository.save(favourites);
         break;
       case 'track':
-        this.favorites.tracks.push(id);
+        favourites.tracks.push(track);
+        await this.favsRepository.save(favourites);
         break;
     }
   }
 
-  delete({ type, id }: RemoveFromFavourites) {
+  async delete({ type, id }: RemoveFromFavourites) {
+    const favourites = await this.get();
+
     switch (type) {
       case 'album':
-        const album = this.favorites.albums.find((albumId) => albumId === id);
+        const album = favourites.albums.find((album) => album.id === id);
         if (album) {
-          this.favorites.albums = this.favorites.albums.filter(
-            (albumId) => albumId !== id,
+          favourites.albums = favourites.albums.filter(
+            (album) => album.id !== id,
           );
+          await this.favsRepository.save(favourites);
           return true;
         } else {
           return false;
         }
 
       case 'artist':
-        const artist = this.favorites.artists.find(
-          (artistId) => artistId === id,
-        );
+        const artist = favourites.artists.find((artist) => artist.id === id);
         if (artist) {
-          this.favorites.artists = this.favorites.artists.filter(
-            (artistsId) => artistsId !== id,
+          favourites.artists = favourites.artists.filter(
+            (artist) => artist.id !== id,
           );
+          await this.favsRepository.save(favourites);
           return true;
         } else {
           return false;
         }
 
       case 'track':
-        const track = this.favorites.tracks.find((trackId) => trackId === id);
+        const track = favourites.tracks.find((track) => track.id === id);
         if (track) {
-          this.favorites.tracks = this.favorites.tracks.filter(
-            (tracksId) => tracksId !== id,
+          favourites.tracks = favourites.tracks.filter(
+            (track) => track.id !== id,
           );
+          await this.favsRepository.save(favourites);
           return true;
         } else {
           return false;

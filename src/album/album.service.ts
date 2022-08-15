@@ -1,56 +1,69 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/createAlbum.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { UpdateAlbumDto } from './dto/updateAlbum.dto';
-import { IAlbum } from './interfaces';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { AlbumEntity } from './entities/album.entity';
 
 @Injectable()
 export class AlbumService {
-  private albums: IAlbum[] = [];
+  @InjectRepository(AlbumEntity)
+  private albumRepository: Repository<AlbumEntity>;
 
-  findAllAlbums() {
-    return this.albums;
+  async findAllAlbums() {
+    const albums = await this.albumRepository.find();
+    return albums;
   }
 
-  findAlbumById(id: string) {
-    return this.albums.find((album) => album.id === id);
+  async findAlbumById(id: string) {
+    const album = await this.albumRepository.findOne({ where: { id } });
+    if (album) {
+      return album;
+    } else {
+      return null;
+    }
   }
 
-  create({ name, year, artistId }: CreateAlbumDto): IAlbum {
-    const newAlbum = {
-      id: uuidv4(),
-      name,
-      year,
-      artistId,
-    };
-    this.albums.push(newAlbum);
-    return newAlbum;
+  async create(createAlbumDto: CreateAlbumDto) {
+    const createdAlbum = this.albumRepository.create(createAlbumDto);
+    const savedAlbum = await this.albumRepository.save(createdAlbum);
+
+    if (savedAlbum) {
+      return savedAlbum.toResponse();
+    } else {
+      return null;
+    }
   }
 
-  update(id: string, { name, year, artistId }: UpdateAlbumDto) {
-    const album = this.albums.find((album) => album.id === id);
+  async update(id: string, { name, year, artistId }: UpdateAlbumDto) {
+    const album = await this.albumRepository.findOne({ where: { id } });
     if (album) {
       name ? (album.name = name) : false;
       year ? (album.year = year) : false;
       artistId ? (album.artistId = artistId) : false;
-      return album;
+      return (await this.albumRepository.save(album)).toResponse();
     } else {
       return false;
     }
   }
 
-  delete(id: string) {
-    const album = this.albums.find((album) => album.id === id);
-    if (album) {
-      this.albums = this.albums.filter((album) => album.id !== id);
+  async delete(id: string) {
+    const response = await this.albumRepository.delete(id);
+    if (response.affected !== 0) {
       return true;
     } else {
       return false;
     }
   }
 
-  handleDeletedArtistReference(id: string) {
-    const albums = this.albums.filter((album) => album.artistId === id);
-    albums.forEach((album) => (album.artistId = null));
+  async handleDeletedArtistReference(id: string) {
+    try {
+      const albumsWithRef = (await this.findAllAlbums()).filter(
+        (album) => album.artistId === id,
+      );
+      albumsWithRef.forEach(
+        async (album) => await this.update(album.id, { artistId: null }),
+      );
+    } catch (err) {}
   }
 }

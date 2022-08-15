@@ -1,46 +1,46 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUser.dto';
-import { IUser } from './interfaces';
-import { v4 as uuidv4 } from 'uuid';
 import { UpdatePasswordDto } from './dto/updatePassword.dto';
-import { userToOutput } from './userMutations';
+import { UserEntity } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
-  private users: IUser[] = [];
+  constructor(
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+  ) {}
 
-  findAll() {
-    return this.users.map(userToOutput);
+  async create(userDto: CreateUserDto) {
+    const createdUser = this.userRepository.create(userDto);
+    const savedUser = await this.userRepository.save(createdUser);
+    if (savedUser) {
+      return savedUser.toResponse();
+    } else {
+      return null;
+    }
   }
 
-  findById(id: string) {
-    const user = this.users.find((user) => user.id === id);
-    return userToOutput(user);
+  async findAll() {
+    const users = await this.userRepository.find();
+    return users.map((user) => user.toResponse());
   }
 
-  create({ login, password }: CreateUserDto) {
-    const newUser: IUser = {
-      id: uuidv4(),
-      login,
-      password,
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-
-    this.users.push(newUser);
-
-    return userToOutput(newUser);
+  async findById(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (user) {
+      return user.toResponse();
+    } else {
+      return null;
+    }
   }
 
-  update(id: string, { oldPassword, newPassword }: UpdatePasswordDto) {
-    const user = this.users.find((user) => user.id === id);
-
+  async update(id: string, { oldPassword, newPassword }: UpdatePasswordDto) {
+    const user = await this.userRepository.findOne({ where: { id } });
     if (user && oldPassword === user.password) {
       user.password = newPassword;
-      user.updatedAt = Date.now();
-      user.version += 1;
-      return userToOutput(user);
+      return (await this.userRepository.save(user)).toResponse();
     } else if (user && oldPassword !== user.password) {
       return 'wrong password';
     } else {
@@ -48,10 +48,9 @@ export class UserService {
     }
   }
 
-  delete(id: string) {
-    const user = this.users.find((user) => user.id === id);
-    if (user) {
-      this.users = this.users.filter((user) => user.id !== id);
+  async delete(id: string) {
+    const response = await this.userRepository.delete(id);
+    if (response.affected !== 0) {
       return true;
     } else {
       return false;

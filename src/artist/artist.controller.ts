@@ -27,31 +27,33 @@ export class ArtistController {
   ) {}
 
   @Get()
-  findAllArtists() {
-    return this.artistService.findAllArtists();
+  async findAllArtists() {
+    return (await this.artistService.findAllArtists()).map((artist) =>
+      artist.toResponse(),
+    );
   }
 
   @Get(':id')
-  findArtistById(@Param() { id }: FindOneParams) {
-    const artist = this.artistService.findArtistById(id);
+  async findArtistById(@Param() { id }: FindOneParams) {
+    const artist = await this.artistService.findArtistById(id);
     if (artist) {
-      return artist;
+      return artist.toResponse();
     } else {
       throw new NotFoundException('Artist not found');
     }
   }
 
   @Post()
-  createArtist(@Body() createArtistDto: CreateArtistDto) {
-    return this.artistService.create(createArtistDto);
+  async createArtist(@Body() createArtistDto: CreateArtistDto) {
+    return await this.artistService.create(createArtistDto);
   }
 
   @Put(':id')
-  updateArtist(
+  async updateArtist(
     @Param() { id }: FindOneParams,
     @Body() updateArtistDto: UpdateArtistDto,
   ) {
-    const artist = this.artistService.update(id, updateArtistDto);
+    const artist = await this.artistService.update(id, updateArtistDto);
     if (artist) {
       return artist;
     } else {
@@ -61,14 +63,12 @@ export class ArtistController {
 
   @Delete(':id')
   @HttpCode(204)
-  deleteArtist(@Param() { id }: FindOneParams) {
-    const response = this.artistService.delete(id);
+  async deleteArtist(@Param() { id }: FindOneParams) {
+    const response = await this.artistService.delete(id);
     if (response) {
-      try {
-        this.favsService.delete({ type: 'artist', id });
-        this.albumService.handleDeletedArtistReference(id);
-        this.trackService.handleDeletedArtistReference(id);
-      } catch (err) {}
+      await this.trackService.handleDeletedRef('artist', id);
+      await this.albumService.handleDeletedArtistReference(id);
+      await this.favsService.delete({ type: 'artist', id });
       return true;
     } else {
       throw new NotFoundException('Artist not found');

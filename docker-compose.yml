@@ -5,6 +5,8 @@ services:
       - .env
     build: 
       context: ./
+    networks:
+      - nodejs-service
     ports: 
       - ${PORT}:${PORT}
     working_dir: /app
@@ -12,7 +14,6 @@ services:
       - type: bind
         source: ./
         target: /app
-    network_mode: 'host'
     depends_on:
       - postgres
     restart: always
@@ -20,13 +21,14 @@ services:
     
   postgres:
     container_name: nodejs-service-db
-    build: ./src/db
+    build: 
+      context: ./src/db
+    networks:
+      - nodejs-service
     volumes: 
       - nodejs-service-data:/src
     env_file:
       - .env
-    networks:
-      - nodejs-service
     ports: 
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     restart: always
@@ -35,4 +37,4 @@ volumes:
   nodejs-service-data:
 
 networks:
-  nodejs-service: {}
+  nodejs-service: 

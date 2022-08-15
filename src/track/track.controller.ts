@@ -14,6 +14,7 @@ import { FindOneParams } from './dto/findOneParams.dto';
 import { UpdateTrackDto } from './dto/updateTrack.dto';
 import { TrackService } from './track.service';
 import { FavsService } from 'src/favs/favs.service';
+import { Public } from 'src/meta/public';
 
 @Controller('track')
 export class TrackController {

@@ -10,6 +10,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { FavsService } from 'src/favs/favs.service';
+import { Public } from 'src/meta/public';
 import { TrackService } from 'src/track/track.service';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/createAlbum.dto';

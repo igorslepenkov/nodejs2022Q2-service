@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { AlbumService } from 'src/album/album.service';
 import { FavsService } from 'src/favs/favs.service';
+import { Public } from 'src/meta/public';
 import { TrackService } from 'src/track/track.service';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/createArtist.dto';

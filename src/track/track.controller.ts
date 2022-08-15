@@ -7,16 +7,21 @@ import {
   NotFoundException,
   Put,
   Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { CreateTrackDto } from './dto/createTrack.dto';
 import { FindOneParams } from './dto/findOneParams.dto';
 import { UpdateTrackDto } from './dto/updateTrack.dto';
 import { TrackService } from './track.service';
 import { ITrack } from './interfaces';
+import { FavsService } from 'src/favs/favs.service';
 
 @Controller('track')
 export class TrackController {
-  constructor(private trackService: TrackService) {}
+  constructor(
+    private trackService: TrackService,
+    private favsService: FavsService,
+  ) {}
 
   @Get()
   getTracks(): ITrack[] {
@@ -53,9 +58,13 @@ export class TrackController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   deleteTrack(@Param() { id }: FindOneParams) {
-    const deleteTrack = this.trackService.delete(id);
-    if (deleteTrack) {
+    const response = this.trackService.delete(id);
+    if (response) {
+      try {
+        this.favsService.delete({ type: 'track', id });
+      } catch (err) {}
       return true;
     } else {
       throw new NotFoundException('User not found');

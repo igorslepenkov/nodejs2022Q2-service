@@ -21,10 +21,9 @@ export class TrackService {
       id: uuidv4(),
       name,
       duration,
+      artistId: artistId || null,
+      albumId: albumId || null,
     };
-    artistId ? (newTrack.artistId = artistId) : false;
-    albumId ? (newTrack.albumId = albumId) : false;
-
     this.tracks.push(newTrack);
     return newTrack;
   }
@@ -52,5 +51,15 @@ export class TrackService {
     } else {
       return false;
     }
+  }
+
+  handleDeletedAlbumReference(id: string) {
+    const tracks = this.tracks.filter((track) => track.albumId === id);
+    tracks.forEach((track) => (track.albumId = null));
+  }
+
+  handleDeletedArtistReference(id: string) {
+    const tracks = this.tracks.filter((track) => track.artistId === id);
+    tracks.forEach((track) => (track.artistId = null));
   }
 }
